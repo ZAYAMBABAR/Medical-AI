@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Medical AI Imaging Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+:root {
+  --bg-dark: #05080f;
+  --bg-card: rgba(15, 23, 42, 0.6);
+  --bg-glass: rgba(255, 255, 255, 0.03);
+  --stroke: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.3);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --gradient-primary: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  --font-main: 'Inter', sans-serif;
+  --font-title: 'Outfit', sans-serif;
+  --radius: 20px;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --bg-grad-1: rgba(56, 189, 248, 0.15);
+  --bg-grad-2: rgba(129, 140, 248, 0.1);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg-dark: #f0f4f8;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-glass: rgba(0, 0, 0, 0.05);
+  --stroke: rgba(0, 0, 0, 0.1);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --accent: #0284c7;
+  --accent-glow: rgba(2, 132, 199, 0.1);
+  --shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  --bg-grad-1: rgba(2, 132, 199, 0.05);
+  --bg-grad-2: rgba(0, 0, 0, 0.02);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: var(--bg-dark); color: var(--text-main); font-family: var(--font-main); transition: background 0.3s, color 0.3s; }
+
+body {
+  background: radial-gradient(circle at 0% 0%, var(--bg-grad-1) 0%, transparent 40%),
+              radial-gradient(circle at 100% 100%, var(--bg-grad-2) 0%, transparent 40%),
+              var(--bg-dark);
+  overflow: hidden;
+}
+
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 420px 1fr; /* Increased width */
+  padding: 16px;
+  gap: 16px;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.brand { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.brand-mark {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: var(--gradient-primary);
+  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+}
+.brand-title { font-family: var(--font-title); font-size: 20px; font-weight: 700; }
+.brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.card {
+  background: var(--bg-glass);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 16px;
+}
+.card-title {
+  font-family: var(--font-title);
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+/* Patient Info */
+.patient-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wide-field { grid-column: 1 / -1; }
+.p-field label, .p-field span { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.p-field input, .p-field select {
+  width: 100%; 
+  background: #000 !important; /* Force black background */
+  border: 1px solid var(--stroke);
+  border-radius: 8px; 
+  padding: 8px 12px; 
+  color: #fff; 
+  outline: none; 
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.p-field select option {
+  background: #000;
+  color: #fff;
+}
+
+.p-field input:focus, .p-field select:focus { 
+  border-color: var(--accent); 
+  box-shadow: 0 0 0 2px var(--accent-glow); 
+}
+
+/* Chat Assistant - Increased length and optimized position */
+.sidebar-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg-glass);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 12px;
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 14px 50px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msg { display: flex; flex-direction: column; max-width: 85%; position: relative; }
+.msg.user { align-self: flex-end; }
+.msg.assistant { align-self: flex-start; }
+
+.bubble { 
+  padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; 
+  border: 1px solid var(--stroke); word-wrap: break-word;
+}
+.msg.user .bubble { 
+  background: rgba(255,255,255,0.05); color: var(--text-main); 
+  border-bottom-right-radius: 2px;
+}
+.msg.assistant .bubble { 
+  background: var(--accent-glow); color: var(--text-main); 
+  border-color: var(--accent); border-bottom-left-radius: 2px;
+}
+
+
+
+.chat-row { 
+  display: flex; 
+  gap: 8px; 
+  margin-top: 4px;
+}
+.chat-row input {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #fff;
+  outline: none;
+  font-size: 13px;
+}
+.chat-row input:focus { border-color: var(--accent); }
+
+.btn-icon {
+  width: 42px; height: 42px; border-radius: 10px; border: none; cursor: pointer;
+  display: grid; place-items: center; transition: 0.2s;
+}
+.btn-icon.primary { background: var(--gradient-primary); color: #000; }
+.btn-icon.ghost { background: var(--bg-glass); color: var(--text-muted); border: 1px solid var(--stroke); }
+.btn-icon:hover { transform: scale(1.05); }
+
+
+
+/* Main Section */
+.main { background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--stroke); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar { padding: 14px 20px; border-bottom: 1px solid var(--stroke); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: 0.3s; }
+.status-dot.ok { background: var(--success); box-shadow: 0 0 12px var(--success); }
+.status-dot.busy { background: var(--warning); box-shadow: 0 0 12px var(--warning); }
+.status-dot.err { background: var(--danger); box-shadow: 0 0 12px var(--danger); }
+.status-text { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+.pill-btn {
+  background: var(--bg-glass); border: 1px solid var(--stroke); padding: 8px 14px; border-radius: 99px;
+  cursor: pointer; display: flex; gap: 10px; font-size: 12px; transition: 0.2s;
+}
+.pill-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+.pill-v { font-weight: 700; color: var(--accent); }
+
+.grid { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; overflow-y: auto; flex: 1; }
+.panel { background: var(--bg-glass); border: 1px solid var(--stroke); border-radius: 20px; padding: 18px; }
+.panel.wide { grid-column: 1 / -1; }
+.panel.glass { box-shadow: inset 0 0 20px rgba(255,255,255,0.02); }
+.panel-title { font-family: var(--font-title); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 16px; }
+
+/* Segmented Control */
+.segmented-control {
+  display: flex; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 14px; border: 1px solid var(--stroke);
+}
+.seg-item {
+  flex: 1; background: none; border: none; padding: 10px; border-radius: 10px; color: var(--text-muted);
+  font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
+}
+.seg-item.active { background: var(--bg-glass); color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.seg-item:hover:not(.active) { color: var(--text-main); background: rgba(255,255,255,0.03); }
+
+/* Upload Section */
+.upload-container { display: grid; grid-template-columns: 1fr 200px; gap: 20px; align-items: center; }
+.upload-box {
+  border: 1.5px dashed var(--stroke); border-radius: 16px; padding: 20px; cursor: pointer;
+  transition: 0.2s; background: rgba(0,0,0,0.1); text-align: center;
+}
+.upload-box:hover { border-color: var(--accent); background: rgba(0,0,0,0.2); }
+.upload-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+.accent-text { color: var(--accent); font-weight: 600; }
+
+.upload-actions { display: flex; flex-direction: column; gap: 12px; }
+.btn {
+  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--stroke);
+  font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+}
+.btn.primary-gradient { background: var(--gradient-primary); border: none; color: #000; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.2); }
+.btn.primary-gradient:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(56, 189, 248, 0.3); }
+.btn.ghost { background: transparent; color: var(--text-muted); }
+.btn.ghost:hover:not(:disabled) { background: var(--bg-glass); color: var(--text-main); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Images */
+.image-container {
+  width: 100%; aspect-ratio: 4 / 3; background: #000; border-radius: 16px; position: relative;
+  overflow: hidden; display: grid; place-items: center; border: 1px solid var(--stroke);
+}
+.fitted-image { width: 100%; height: 100%; object-fit: contain; display: block; opacity: 0; transition: opacity 0.5s; }
+.fitted-image.active { opacity: 1; }
+
+.image-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-muted); font-size: 13px; text-align: center; }
+
+/* Visualization Tools */
+.viz-tools { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+.btn-tool {
+  background: var(--bg-glass); border: 1px solid var(--stroke); padding: 8px 12px; border-radius: 10px;
+  color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
+}
+.btn-tool.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+.btn-tool:hover:not(.active) { background: rgba(255,255,255,0.08); color: var(--text-main); }
+.btn-tool.ghost-red { border-color: rgba(239, 68, 68, 0.2); color: var(--danger); }
+.btn-tool.ghost-red:hover { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); }
+.tool-divider { width: 1px; height: 20px; background: var(--stroke); margin: 0 4px; }
+
+/* Prediction Diags */
+.diag-grid { display: grid; grid-template-columns: 140px 1fr 220px; gap: 24px; align-items: center; }
+.circle-box { width: 130px; height: 130px; position: relative; }
+.circle-box svg { transform: rotate(-90deg); }
+.c-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
+.c-fill { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 264; stroke-dashoffset: 264; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
+.c-text { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.c-text span { font-size: 24px; font-weight: 800; font-family: var(--font-title); }
+.c-text label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+
+.diag-label { font-family: var(--font-title); font-size: 26px; font-weight: 700; margin-bottom: 12px; color: var(--accent); }
+.emergency-box label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; font-weight: 600; }
+.emergency-levels { display: flex; gap: 8px; }
+.elvl {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--bg-glass); border: 1px solid var(--stroke); font-weight: 700; font-size: 13px;
+}
+.elvl.active[data-lvl="1"] { background: var(--success); color: #000; border: none; }
+.elvl.active[data-lvl="2"] { background: var(--warning); color: #000; border: none; }
+.elvl.active[data-lvl="3"] { background: #f97316; color: #fff; border: none; }
+.elvl.active[data-lvl="4"] { background: var(--danger); color: #fff; border: none; }
+.diag-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+
+.diag-bars label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 12px; font-weight: 600; }
+.prob-bars { display: flex; flex-direction: column; gap: 10px; }
+.pbar { display: grid; grid-template-columns: 80px 1fr 35px; gap: 10px; align-items: center; }
+.pbar-name { font-size: 11px; font-weight: 600; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pbar-track { height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+.pbar-fill { height: 100%; background: var(--gradient-primary); border-radius: 10px; transition: width 0.8s; }
+.pbar-val { font-size: 10px; color: var(--text-muted); text-align: right; font-family: var(--font-title); font-weight: 600; }
+
+/* Report */
+.panel-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.report-box { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 24px; min-height: 200px; border: 1px solid var(--stroke); position: relative; }
+.report-content { display: flex; flex-direction: column; gap: 20px; }
+.report-item h3 { font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--stroke); padding-bottom: 8px; margin-bottom: 10px; letter-spacing: 0.5px; }
+.report-item p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.85); margin: 0; }
+
+/* Animation Overlays */
+.scan-overlay-v2 { position: absolute; inset: 0; background: rgba(56, 189, 248, 0.05); display: none; pointer-events: none; z-index: 5; }
+.image-container.scanning .scan-overlay-v2 { display: block; }
+.scan-bar { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--accent); box-shadow: 0 0 15px var(--accent); animation: scanLine 2s infinite linear; }
+.scan-tag { position: absolute; bottom: 12px; right: 12px; background: var(--accent); color: #000; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+
+@keyframes scanLine {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(300px); } /* Container is ~300px tall */
+}
+
+/* Image Filters */
+.fx-contrast { filter: contrast(1.5) brightness(1.1); }
+.fx-invert { filter: invert(1) contrast(1.2); }
+.fx-contrast.fx-invert { filter: invert(1) contrast(1.5) brightness(1.1); }
+
+/* Report Styles */
+.report-box { 
+  background: rgba(0,0,0,0.3); border: 1px solid var(--stroke); border-radius: 12px; padding: 20px; 
+  min-height: 150px; position: relative;
+}
+.report-content { font-size: 0.95rem; line-height: 1.6; color: var(--text-main); white-space: pre-wrap; }
+.report-item { margin-bottom: 15px; }
+.report-item h3 { font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.report-item p { margin: 0; color: var(--text-main); opacity: 0.9; }
+
+.medicine-section {
+  margin-top: 15px;
+  padding: 16px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+}
+
+.medicine-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.medicine-section h3::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z'/%3E%3Cpath d='m8.5 8.5 7 7'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.medicine-warning {
+  color: #fb7185;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.medicine-warning svg { width: 14px; height: 14px; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
+  .sidebar { height: auto; }
+  .grid { grid-template-columns: 1fr; }
+  .upload-container { grid-template-columns: 1fr; }
+  .diag-grid { grid-template-columns: 1fr; text-align: center; }
+  .emergency-levels { justify-content: center; }
+}
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div class="brand-text">
+            <div class="brand-title">Medical AI</div>
+            <div class="brand-sub">Imaging Analysis Dashboard</div>
+          </div>
+        </div>
+
+        <div class="card patient-info">
+          <div class="card-title">Patient Information</div>
+          <div class="patient-fields">
+            <div class="p-field wide-field">
+              <span>Full Name</span>
+              <input type="text" id="nameInput" placeholder="Enter patient name..." />
+            </div>
+            <div class="p-field">
+              <span>Age</span>
+              <input type="number" id="ageInput" placeholder="—" />
+            </div>
+            <div class="p-field">
+              <span>Gender</span>
+              <select id="sexInput">
+                <option value="">—</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card sidebar-chat" id="chatPanel">
+          <div class="card-title">Chat Assistant</div>
+          <div class="chat">
+            <div id="chatLog" class="chat-log"></div>
+            <div class="chat-row">
+              <input id="chatInput" type="text" placeholder="Ask a question..." />
+
+              <button id="chatSendBtn" class="btn-icon primary" title="Send message">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <div class="status-dot" id="statusDot"></div>
+            <div class="status-text" id="statusText">System Ready</div>
+          </div>
+          <div class="topbar-right">
+            <button class="pill-btn" id="modePill" type="button">
+              <span class="pill-k">Theme</span>
+              <span class="pill-v" id="modeText">Dark</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="grid">
+          <div class="panel wide glass">
+            <div class="panel-title">Scan Type</div>
+            <div class="segmented-control" role="tablist">
+              <button class="seg-item active" data-scan="chest_xray">Chest X-ray</button>
+              <button class="seg-item" data-scan="bone_xray">Bone X-ray</button>
+              <button class="seg-item" data-scan="brain_mri">Brain MRI</button>
+            </div>
+          </div>
+
+          <!-- Restored & Beautified Upload Section -->
+          <div class="panel wide glass">
+            <div class="panel-title">Upload & Analysis</div>
+            <div class="upload-container">
+                <label class="upload-box" for="fileInput" id="dropzone">
+                   <input id="fileInput" type="file" accept="image/*" style="display:none" />
+                   <div class="upload-content">
+                     <div class="upload-text">
+                        Drag and drop a medical scan here or <span class="accent-text">click to browse</span>
+                        <p>JPEG, PNG, DICOM supported</p>
+                     </div>
+                   </div>
+                </label>
+               <div class="upload-actions">
+                  <button id="analyzeBtn" class="btn primary-gradient" disabled>Start Analysis</button>
+                  <button id="resetBtn" class="btn ghost" disabled>Reset</button>
+               </div>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <div class="panel-title">Analyzed Output (Original)</div>
+            <div class="image-container" id="inputFrame">
+              <div class="image-empty" id="inputEmpty">
+                <p>Waiting for scan upload...</p>
+              </div>
+              <img id="inputImg" alt="Original Scan" class="fitted-image" />
+              <div class="scan-overlay-v2" id="scanOverlay">
+                <div class="scan-bar"></div>
+                <div class="scan-tag">AI SCANNING</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <div class="panel-title">Medical Visualization</div>
+            <div class="image-container" id="overlayFrame">
+              <div class="image-empty" id="overlayEmpty">
+                <p>Analysis results will appear here.</p>
+              </div>
+              <img id="overlayImg" alt="Medical Overlay" class="fitted-image" />
+              <div class="scan-overlay-v2" id="resultScanOverlay">
+                <div class="scan-bar"></div>
+                <div class="scan-tag">PROCESSING</div>
+              </div>
+            </div>
+            <div class="viz-tools">
+              <button class="btn-tool active" id="fxHeatmapBtn">Heatmap</button>
+              <button class="btn-tool" id="fxRoiBtn">ROI Circle</button>
+              <div class="tool-divider"></div>
+              <button class="btn-tool" id="fxContrastBtn">Contrast</button>
+              <button class="btn-tool" id="fxInvertBtn">Invert</button>
+              <button class="btn-tool ghost-red" id="fxClearBtn">Clear All</button>
+            </div>
+          </div>
+
+          <div class="panel wide glass">
+            <div class="panel-title">Prediction Diagnostics</div>
+            <div class="diag-grid">
+              <div class="diag-score">
+                <div class="circle-box">
+                  <svg viewBox="0 0 100 100">
+                    <circle class="c-bg" cx="50" cy="50" r="42"></circle>
+                    <circle class="c-fill" cx="50" cy="50" r="42" id="confFill"></circle>
+                  </svg>
+                  <div class="c-text">
+                    <span id="predConf">0%</span>
+                    <label>Confidence</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="diag-info">
+                <div class="diag-label" id="predLabel">No Analysis</div>
+                <div class="emergency-box">
+                  <label>Emergency Triage Level</label>
+                  <div class="emergency-levels" id="dangerLevel">
+                    <div class="elvl" data-lvl="1">1</div>
+                    <div class="elvl" data-lvl="2">2</div>
+                    <div class="elvl" data-lvl="3">3</div>
+                    <div class="elvl" data-lvl="4">4</div>
+                  </div>
+                  <p id="dangerHint" class="diag-hint">System ready for evaluation.</p>
+                </div>
+              </div>
+
+              <div class="diag-bars">
+                <label>Classification Breakdown</label>
+                <div class="prob-bars" id="bars"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel wide glass">
+            <div class="panel-header-flex">
+               <div class="panel-title">AI Clinical Report</div>
+               <button id="downloadPdfBtn" class="btn small primary-gradient" style="display: none;">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 3v12"/></svg>
+                 Download PDF
+               </button>
+            </div>
+            <div class="report-box" id="reportBox">
+              <div class="medicine-warning" style="margin-bottom: 20px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
+                WARNING: Please consult a doctor. This report is for educational assistance only.
+              </div>
+              <div class="image-empty" id="reportEmpty">
+                <p>Run analysis to generate the medical report.</p>
+              </div>
+              <div id="reportContent" class="report-content"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+const state = {
+  scanType: "chest_xray",
+  file: null,
+  lastPrediction: null,
+  theme: localStorage.getItem("theme") || "dark",
+  chatMessages: [],
+  activeView: "heatmap", // 'heatmap' or 'roi'
+};
+
+const el = (id) => document.getElementById(id);
+
+function setStatus(kind, text) {
+  const dot = el("statusDot");
+  dot.classList.remove("ok", "busy", "err");
+  if (kind) dot.classList.add(kind);
+  el("statusText").textContent = text;
+}
+
+function setTheme(theme) {
+  state.theme = theme;
+  document.documentElement.dataset.theme = theme === "light" ? "light" : "dark";
+  el("modeText").textContent = theme === "light" ? "Light" : "Dark";
+  localStorage.setItem("theme", theme);
+}
+
+function setScanType(scanType) {
+  state.scanType = scanType;
+  document.querySelectorAll(".seg-item").forEach((b) => {
+    b.classList.toggle("active", b.dataset.scan === scanType);
+  });
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error("Failed to read file"));
+    r.readAsDataURL(file);
+  });
+}
+
+function base64PngToDataUrl(b64) {
+  return `data:image/png;base64,${b64}`;
+}
+
+function clearPrediction() {
+  el("predLabel").textContent = "No Analysis";
+  updateCircularProgress(0);
+  el("bars").innerHTML = "";
+  el("reportContent").innerHTML = "";
+  el("reportEmpty").style.display = "flex";
+  el("dangerHint").textContent = "System ready for evaluation.";
+  document.querySelectorAll(".elvl").forEach((b) => b.classList.remove("active"));
+  el("downloadPdfBtn").style.display = "none";
+}
+
+function updateCircularProgress(value) {
+  const circle = el("confFill");
+  const text = el("predConf");
+  if (!circle || !text) return;
+
+  const pct = Math.round(value * 100);
+  text.textContent = `${pct}%`;
+
+  // r=42 => circumference ~ 264
+  const offset = 264 - (pct / 100) * 264;
+  circle.style.strokeDashoffset = offset;
+}
+
+function renderReport(rawReport) {
+  const content = el("reportContent");
+  const empty = el("reportEmpty");
+  if (!content) return;
+
+  content.innerHTML = "";
+  if (!rawReport || !rawReport.trim()) {
+    empty.style.display = "flex";
+    return;
+  }
+  empty.style.display = "none";
+
+  const sections = rawReport.split(/\n(?=[A-Za-z\s]+:)/);
+  sections.forEach(sec => {
+    const parts = sec.split(":");
+    const title = parts[0].trim();
+    const rest = parts.slice(1).join(":").trim();
+    if (!title || !rest) return;
+
+    if (title.toUpperCase() === "WARNING" || title.includes("Please consult a doctor")) {
+        const warnDiv = document.createElement("div");
+        warnDiv.className = "medicine-warning";
+        warnDiv.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg> ${title}: ${rest}`;
+        content.appendChild(warnDiv);
+        return;
+    }
+
+    const div = document.createElement("div");
+    div.className = title.toLowerCase().includes("medicine") ? "report-item medicine-section" : "report-item";
+    
+    const h3 = document.createElement("h3");
+    h3.textContent = title;
+    
+    const p = document.createElement("p");
+    p.textContent = rest;
+    
+    div.appendChild(h3);
+    div.appendChild(p);
+    content.appendChild(div);
+  });
+}
+
+function renderBars(scores) {
+  const wrap = el("bars");
+  wrap.innerHTML = "";
+  scores.forEach((s) => {
+    const row = document.createElement("div");
+    row.className = "pbar";
+    const name = document.createElement("div");
+    name.className = "pbar-name";
+    name.textContent = s.label;
+    const track = document.createElement("div");
+    track.className = "pbar-track";
+    const fill = document.createElement("div");
+    fill.className = "pbar-fill";
+    track.appendChild(fill);
+    const val = document.createElement("div");
+    val.className = "pbar-val";
+    val.textContent = `${Math.round(s.confidence * 100)}%`;
+    row.appendChild(name);
+    row.appendChild(track);
+    row.appendChild(val);
+    wrap.appendChild(row);
+    requestAnimationFrame(() => {
+      fill.style.width = `${Math.max(0, Math.min(100, s.confidence * 100))}%`;
+    });
+  });
+}
+
+function setScanning(on, target = "input") {
+  const frame = target === "input" ? el("inputFrame") : el("overlayFrame");
+  if (on) frame.classList.add("scanning");
+  else frame.classList.remove("scanning");
+}
+
+async function onFileSelected(file) {
+  state.file = file;
+  state.lastPrediction = null;
+  el("analyzeBtn").disabled = !file;
+  el("resetBtn").disabled = !file;
+  clearPrediction();
+  const url = await fileToDataUrl(file);
+  el("inputImg").src = url;
+  el("inputImg").classList.add("active");
+  el("inputEmpty").style.display = "none";
+  el("overlayImg").src = "";
+  el("overlayImg").classList.remove("active");
+  el("overlayEmpty").style.display = "flex";
+  setStatus("ok", "Image ready for analysis");
+}
+
+function isAbnormal(label) {
+  if (!label) return false;
+  const l = label.toLowerCase();
+  const normalLike = ["normal", "no", "notumor", "no analysis"];
+  return !normalLike.some(n => l.includes(n));
+}
+
+function updateToolState() {
+  const abnormal = isAbnormal(state.lastPrediction?.label);
+  const btns = ["fxHeatmapBtn", "fxRoiBtn", "fxContrastBtn", "fxInvertBtn"];
+  btns.forEach(id => {
+    const b = el(id);
+    if (b) {
+      b.disabled = !abnormal;
+      b.style.opacity = abnormal ? "1" : "0.3";
+      b.style.pointerEvents = abnormal ? "auto" : "none";
+    }
+  });
+}
+
+async function analyze() {
+  if (!state.file) return;
+  setStatus("busy", "AI Analysis in progress...");
+  el("analyzeBtn").disabled = true;
+  
+  try {
+    const form = new FormData();
+    form.append("file", state.file);
+    const age = el("ageInput").value;
+    const sex = el("sexInput").value;
+    if (age) form.append("age", age);
+    if (sex) form.append("sex", sex);
+
+    setScanning(true, "input");
+
+    const res = await fetch(`/predict/${state.scanType}`, { method: "POST", body: form });
+    if (!res.ok) throw new Error("Analysis failed");
+    const data = await res.json();
+    state.lastPrediction = data;
+
+    el("predLabel").textContent = data.label;
+    updateCircularProgress(data.confidence);
+    renderBars(data.scores);
+
+    const dl = Number(data.danger_level || 0);
+    document.querySelectorAll(".elvl").forEach(b => b.classList.toggle("active", Number(b.dataset.lvl) === dl));
+    
+    const hints = {
+      1: "Level 1: Minimal concern detected.",
+      2: "Level 2: Potential finding. Correlation needed.",
+      3: "Level 3: Significant finding detected.",
+      4: "Level 4: Critical finding requiring attention."
+    };
+    el("dangerHint").textContent = hints[dl] || "—";
+
+    setScanning(true, "result");
+    window.setTimeout(() => {
+      setScanning(false, "result");
+      setScanning(false, "input");
+      state.activeView = "heatmap";
+      updateVisualization();
+      updateToolState();
+      el("downloadPdfBtn").style.display = "flex";
+    }, 1500);
+
+    renderReport(data.report);
+    setStatus("ok", "Analysis Complete");
+  } catch (e) {
+    setStatus("err", "Analysis Error");
+    alert(`Error: ${e.message}`);
+  } finally {
+    el("analyzeBtn").disabled = !state.file;
+  }
+}
+
+function updateVisualization() {
+  if (!state.lastPrediction) return;
+  const img = el("overlayImg");
+  const abnormal = isAbnormal(state.lastPrediction.label);
+  
+  let b64;
+  if (!abnormal) {
+    // If normal, always show original in the result panel
+    b64 = state.lastPrediction.input_png_base64;
+  } else {
+    // If abnormal, show heatmap or ROI
+    b64 = state.activeView === "roi" ? state.lastPrediction.roi_png_base64 : state.lastPrediction.overlay_png_base64;
+  }
+  
+  img.src = base64PngToDataUrl(b64);
+  img.classList.add("active");
+  el("overlayEmpty").style.display = "none";
+  
+  el("fxHeatmapBtn").classList.toggle("active", state.activeView === "heatmap");
+  el("fxRoiBtn").classList.toggle("active", state.activeView === "roi");
+}
+
+function toggleFilter(cls) {
+  if (state.activeView === "roi") {
+    state.activeView = "heatmap";
+    updateVisualization();
+  }
+  el("overlayImg").classList.toggle(cls);
+  el("fxContrastBtn").classList.toggle("active", el("overlayImg").classList.contains("fx-contrast"));
+  el("fxInvertBtn").classList.toggle("active", el("overlayImg").classList.contains("fx-invert"));
+}
+
+function clearAll() {
+  state.activeView = "heatmap";
+  el("overlayImg").classList.remove("fx-contrast", "fx-invert");
+  el("fxContrastBtn").classList.remove("active");
+  el("fxInvertBtn").classList.remove("active");
+  updateVisualization();
+}
+
+function resetAll() {
+  state.file = null;
+  state.lastPrediction = null;
+  el("fileInput").value = "";
+  el("nameInput").value = "";
+  el("ageInput").value = "";
+  el("sexInput").value = "";
+  el("analyzeBtn").disabled = true;
+  el("resetBtn").disabled = true;
+  el("inputImg").src = "";
+  el("inputImg").classList.remove("active");
+  el("inputEmpty").style.display = "flex";
+  el("overlayImg").src = "";
+  el("overlayImg").classList.remove("active");
+  el("overlayEmpty").style.display = "flex";
+  clearPrediction();
+  setScanning(false, "input");
+  setScanning(false, "result");
+  clearAll();
+  updateToolState();
+  setStatus("ok", "System Ready");
+}
+
+
+function appendChat(role, content) {
+  state.chatMessages.push({ role, content });
+  const log = el("chatLog");
+  const msg = document.createElement("div");
+  msg.className = `msg ${role}`;
+  
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = content;
+  msg.appendChild(bubble);
+  
+  log.appendChild(msg);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function sendChat() {
+  const input = el("chatInput");
+  const text = (input?.value || "").trim();
+  if (!text) return;
+  input.value = "";
+  appendChat("user", text);
+  setStatus("busy", "Thinking...");
+  try {
+    const res = await fetch(`/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: state.chatMessages,
+        scan_context: state.lastPrediction ? {
+          scan_type: state.lastPrediction.scan_type,
+          label: state.lastPrediction.label,
+          confidence: state.lastPrediction.confidence,
+          danger_level: state.lastPrediction.danger_level,
+        } : null,
+      }),
+    });
+    const data = await res.json();
+    appendChat("assistant", data.reply || "(no reply)");
+
+    setStatus("ok", `Chat Ready`);
+  } catch (e) {
+    appendChat("assistant", "Chat service error.");
+    setStatus("err", "Chat Error");
+  }
+}
+
+
+
+async function downloadPDF() {
+  if (!state.lastPrediction) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  const name = el("nameInput").value || "Anonymous Patient";
+  const age = el("ageInput").value || "N/A";
+  const sex = el("sexInput").value || "N/A";
+  const date = new Date().toLocaleString();
+
+  doc.setFillColor(15, 23, 42);
+  doc.rect(0, 0, 210, 40, 'F');
+  doc.setFontSize(22);
+  doc.setTextColor(255);
+  doc.text("Medical AI Analysis Report", 20, 25);
+  doc.setFontSize(10);
+  doc.setTextColor(148, 163, 184);
+  doc.text(`ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()} | ${date}`, 20, 33);
+
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  doc.text("PATIENT SUMMARY", 20, 50);
+  doc.setFontSize(10);
+  doc.text(`Name: ${name}`, 20, 58);
+  doc.text(`Age: ${age}`, 100, 58);
+  doc.text(`Gender: ${sex}`, 160, 58);
+  
+  doc.setFontSize(12);
+  doc.text("DIAGNOSTIC FINDINGS", 20, 75);
+  doc.setFontSize(10);
+  doc.text(`Scan Type: ${state.scanType.toUpperCase().replace('_', ' ')}`, 20, 83);
+  doc.text(`Primary Finding: ${state.lastPrediction.label}`, 20, 90);
+  doc.text(`Confidence: ${Math.round(state.lastPrediction.confidence * 100)}%`, 20, 97);
+  doc.text(`Emergency Level: ${state.lastPrediction.danger_level}`, 20, 104);
+
+  try {
+    const canvas = await html2canvas(el("overlayFrame"), {
+      backgroundColor: "#000",
+      logging: false,
+      useCORS: true
+    });
+    const imgData = canvas.toDataURL("image/jpeg", 0.8);
+    doc.addImage(imgData, 'JPEG', 20, 115, 170, 127);
+  } catch (err) {
+    doc.text("[Image attachment failed]", 20, 120);
+  }
+
+  doc.addPage();
+  doc.setFontSize(12);
+  doc.text("DETAILED CLINICAL REPORT", 20, 20);
+  doc.setFontSize(10);
+  const reportText = state.lastPrediction.report || "No detailed report available.";
+  const splitText = doc.splitTextToSize(reportText, 170);
+  doc.text(splitText, 20, 30);
+  
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  const disclaimer = "This report is AI-generated for educational assistance and triage support. It is not a clinical diagnosis. Radiologist correlation required.";
+  doc.text(doc.splitTextToSize(disclaimer, 170), 20, 280);
+  
+  doc.save(`Medical_Analysis_${name.replace(/\s+/g, '_')}.pdf`);
+}
+
+function init() {
+  document.querySelectorAll(".seg-item").forEach(b => b.addEventListener("click", () => setScanType(b.dataset.scan)));
+  const dropzone = el("dropzone");
+  dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+  dropzone.addEventListener("drop", e => {
+    e.preventDefault(); dropzone.classList.remove("dragover");
+    const f = e.dataTransfer.files?.[0];
+    if (f) onFileSelected(f);
+  });
+  el("fileInput").addEventListener("change", e => {
+    const f = e.target.files?.[0];
+    if (f) onFileSelected(f);
+  });
+  el("analyzeBtn").addEventListener("click", analyze);
+  el("resetBtn").addEventListener("click", resetAll);
+  el("chatSendBtn").addEventListener("click", () => sendChat());
+  el("chatInput").addEventListener("keydown", e => { if (e.key === "Enter") sendChat(); });
+  el("fxHeatmapBtn").addEventListener("click", () => { state.activeView = "heatmap"; updateVisualization(); });
+  el("fxRoiBtn").addEventListener("click", () => { state.activeView = "roi"; updateVisualization(); });
+  el("fxContrastBtn").addEventListener("click", () => toggleFilter("fx-contrast"));
+  el("fxInvertBtn").addEventListener("click", () => toggleFilter("fx-invert"));
+  el("fxClearBtn").addEventListener("click", clearAll);
+  el("downloadPdfBtn").addEventListener("click", downloadPDF);
+  el("modePill").addEventListener("click", () => setTheme(state.theme === "dark" ? "light" : "dark"));
+  
+  appendChat("assistant", "I am your Medical AI Assistant. How can I help you with the analysis today?");
+  updateToolState();
+}
+
+init();
+setTheme(state.theme);
+updateCircularProgress(0);
+</script>
+  </body>
+</html>
